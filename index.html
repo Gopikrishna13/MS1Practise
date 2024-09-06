@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        /* Space between heading */
+        table {
+            width: 80%; /* Adjust the width to center */
+            max-width: 800px; /* Set a max width */
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+        } 
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 columns */
+            gap: 10px;
+            max-width: 800px;
+            margin: 20px 0;
+        }
+
+        .grid-item {
+            background-color: #f2f2f2;
+            padding: 20px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .grid-header {
+            font-weight: bold;
+            background-color: #ddd;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+            justify-content: center; /* Center modal horizontally */
+            align-items: center; /* Center modal vertically */
+            z-index: 1; /* Ensure modal is on top */
+        }
+
+        /* Modal content */
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 300px;
+            text-align: center;
+        }
+
+        /* Close button */
+        .close {
+            color: red;
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .close-bike {
+            color: red;
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Form outside the modal -->
+    <label>UserName</label>
+    <input type="text" id="unameMain">
+    <br><br>
+
+    <label>Password</label>
+    <input type="password" id="passwordMain">
+    <br><br>
+
+    <label>NIC</label>
+    <input type="text" id="nicMain">
+    <br><br>
+
+    <button id="clickMain">Add Main User</button>
+    <button id="add">Add User in Modal</button>
+
+    <!-- Table to display data -->
+    <div id="table"></div>
+    <br>
+    <div id="grid"></div>
+
+    <!-- Modal structure for user details -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <label>UserName</label>
+            <input type="text" id="unameModal">
+            <br><br>
+
+            <label>Password</label>
+            <input type="password" id="passwordModal">
+            <br><br>
+
+            <label>NIC</label>
+            <input type="text" id="nicModal">
+            <br><br>
+
+            <button id="clickModal">Submit in Modal</button>
+        </div>
+    </div>
+
+    <!-- Modal structure for bike rental -->
+    <div id="bikeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-bike">&times;</span>
+            <label>Bike Name</label>
+            <input type="text" id="bikeNameModal">
+            <br><br>
+            <button id="submitBike">Submit</button>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    // Variables to handle modals and buttons
+    const modal = document.getElementById("myModal");
+    const bikeModal = document.getElementById("bikeModal");
+    const openModalBtn = document.getElementById("add");
+    const closeModal = document.querySelector(".close");
+    const closeBikeModal = document.querySelector(".close-bike");
+    let currentUserIndex = null; // Track which user clicked "Rent"
+
+    document.addEventListener("DOMContentLoaded", () => {
+        display();
+    });
+
+    // Show user modal
+    openModalBtn.addEventListener('click', () => {
+        modal.style.display = "flex"; // Show the modal
+    });
+
+    // Close user modal
+    closeModal.addEventListener('click', () => {
+        modal.style.display = "none"; // Hide the modal
+    });
+
+    // Add user from modal
+    document.getElementById("clickModal").addEventListener('click', () => {
+        let adduser = JSON.parse(localStorage.getItem("users")) || [];
+        let username = document.getElementById("unameModal").value;
+        let password = document.getElementById("passwordModal").value;
+        let nic = document.getElementById("nicModal").value;
+
+        const newuser = {
+            username: username,
+            password: password,
+            nic: nic
+        }
+
+        adduser.push(newuser);
+        localStorage.setItem("users", JSON.stringify(adduser));
+        display();
+
+        modal.style.display = "none"; // Close the modal after submission
+    });
+
+    // Add user from the main form
+    document.getElementById("clickMain").addEventListener('click', () => {
+        let adduser = JSON.parse(localStorage.getItem("users")) || [];
+        let username = document.getElementById("unameMain").value;
+        let password = document.getElementById("passwordMain").value;
+        let nic = document.getElementById("nicMain").value;
+
+        const newuser = {
+            username: username,
+            password: password,
+            nic: nic
+        }
+
+        adduser.push(newuser);
+        localStorage.setItem("users", JSON.stringify(adduser));
+        display();
+    });
+
+    // Show bike modal
+    function showBikeModal(index) {
+        currentUserIndex = index;
+        bikeModal.style.display = "flex";
+    }
+
+    // Close bike modal
+    closeBikeModal.addEventListener('click', () => {
+        bikeModal.style.display = "none";
+    });
+
+    // Handle bike submission
+    document.getElementById("submitBike").addEventListener('click', () => {
+        const bikeName = document.getElementById("bikeNameModal").value;
+        if (bikeName !== "" && currentUserIndex !== null) {
+            let users = JSON.parse(localStorage.getItem("users")) || [];
+            users[currentUserIndex].bikeName = bikeName; // Store bike name
+            localStorage.setItem("users", JSON.stringify(users));
+            display(); // Refresh the table/grid
+            bikeModal.style.display = "none"; // Close the modal
+        }
+    });
+
+    // Function to display data
+    function display() {
+        let users = JSON.parse(localStorage.getItem("users")) || [];
+
+        // Display in table format
+        let table = `<table>
+            <tr>
+                <th>UserName</th>
+                <th>Password</th>
+                <th>NIC</th>
+                <th>Action</th>
+            </tr>`;
+
+        users.forEach((user, index) => {
+            const isRented = user.bikeName ? "Return" : "Rent"; // Change to "Return" if rented
+            table += `
+                <tr>
+                    <td>${user.username}</td>
+                    <td>${user.password}</td>
+                    <td>${user.nic}</td>
+                    <td><button class="rent-btn" data-index="${index}">${isRented}</button></td>
+                </tr>`;
+        });
+        table += `</table>`;
+        document.getElementById("table").innerHTML = table;
+
+        // Attach event listeners to rent buttons
+        document.querySelectorAll('.rent-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const index = e.target.getAttribute("data-index");
+                const user = users[index];
+
+                if (e.target.textContent === "Rent") {
+                    showBikeModal(index);
+                } else {
+                    // Handle return (clear bike name)
+                    user.bikeName = null;
+                    localStorage.setItem("users", JSON.stringify(users));
+                    display(); // Refresh the table/grid
+                }
+            });
+        });
+
+        // Display in grid format
+        let grid = `<div class="grid-container">
+            <div class="grid-item grid-header">UserName</div>
+            <div class="grid-item grid-header">Password</div>
+            <div class="grid-item grid-header">NIC</div>
+            <div class="grid-item grid-header">Action</div>`;
+
+        users.forEach((user, index) => {
+            const isRented = user.bikeName ? "Return" : "Rent";
+            grid += `
+                <div class="grid-item">${user.username}</div>
+                <div class="grid-item">${user.password}</div>
+                <div class="grid-item">${user.nic}</div>
+                <div class="grid-item"><button class="rent-btn" data-index="${index}">${isRented}</button></div>`;
+        });
+        grid += `</div>`;
+        document.getElementById("grid").innerHTML = grid;
+    }
+</script>
