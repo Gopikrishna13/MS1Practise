@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .grid-container
+        {
+            display:grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .grid-item {
+            background-color: #f2f2f2;
+            padding: 20px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .grid-header {
+            font-weight: bold;
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <label>Brand</label>
+    <input type="text" id="brand">
+    <br><br>
+
+   
+
+    <input type="file" id="image">
+    <br><br>
+
+    <label>Rent</label>
+    <input type="text" id="rent">
+    <br><br>
+
+<label>Quantity</label>
+<input type="text" id="quantity">
+
+    <div id="regNo"></div>
+
+    <button id="clickMain">Add Bike</button>
+
+    <div id="table"></div>
+    <div id="grid"></div>
+</body>
+</html>
+
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+    display();
+})
+
+function display()
+{
+    let table=`<table>
+        <tr>
+            <th>ID</th>
+            <th>Brand</th>
+            <th>RegNo</th>
+            <th>Rent</th>
+            <th>Image</th>
+            </tr>`;
+
+        let bikedetails=JSON.parse(localStorage.getItem("bike"))|| [];
+
+        for(const bike of bikedetails)
+        {
+            table+=`
+            <tr>
+                <td>${bike.ID}</td>
+                <td>${bike.Brand}</td>
+                <td>${bike.Reg}</td>
+                <td>${bike.Rent}</td>
+                <td><img src="${bike.Image}" width="50"></td>
+                </tr>`;
+        }
+
+        table+=`</table>`;
+        document.getElementById("table").innerHTML=table;
+
+
+
+        //grid
+        let grid=`<div class="grid-container">
+            <div class="grid-header">ID</div>
+              <div class="grid-header">Brand</div>
+                <div class="grid-header">Reg</div>
+                  <div class="grid-header">Rent</div>
+                    <div class="grid-header">Image</div>
+            `;
+
+            for(const b of bikedetails)
+            {
+                grid+=`<div class="grid-item">${b.ID}</div>
+                <div class="grid-item">${b.Brand}</div>
+                <div class="grid-item">${b.Reg}</div>
+                <div class="grid-item">${b.Rent}</div>
+                <div class="grid-item"><img src="${b.Image}" width="50"></div>`;
+            }
+            grid+=`</div>`;
+            document.getElementById("grid").innerHTML=grid;
+}
+
+
+
+
+
+
+document.getElementById("clickMain").addEventListener('click',()=>{
+    const brand=document.getElementById("brand").value;
+   // const reg=document.getElementById("reg").value;
+    const rent=document.getElementById("rent").value;
+    const Image=document.getElementById("image").files[0];
+   let reg_input=document.getElementsByClassName("reg-input");
+
+   
+  
+    
+    let exiting_bikes=JSON.parse(localStorage.getItem("bike"))|| [];
+    const reader=new FileReader();
+
+    reader.onloadend=function()
+    {
+        for(let i=0;i<reg_input.length;++i)
+{
+    const reg=reg_input[i].value;
+    const newBike={
+            ID:exiting_bikes.length+1,
+            Brand:brand,
+            Reg:reg,
+            Rent:rent,
+            Image:reader.result
+
+        }
+        exiting_bikes.push(newBike);
+        localStorage.setItem("bike",JSON.stringify(exiting_bikes));
+        display();
+    
+}
+       
+    }
+    reader.readAsDataURL(Image);
+    
+})
+
+
+document.getElementById("quantity").addEventListener('input',()=>{
+       const quantity=Number(document.getElementById("quantity").value);
+       const container=document.getElementById("regNo");
+       container.innerHTML="";
+ 
+    for(let i=0;i<quantity;++i)
+{
+    const label=document.createElement("label");
+    label.textContent=`Reg No${i+1}`;
+    container.appendChild(label);
+
+    const input=document.createElement("input");
+    input.type=Text;
+    input.classList.add('reg-input');
+    container.appendChild(input);
+
+    container.appendChild(document.createElement("br"));
+    container.appendChild(document.createElement("br"));
+}
+    })
+</script>
