@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Page</title>
+    <style>
+        /* Basic page styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        /* Table container styling */
+        #table-container {
+            width: 80%;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            overflow: hidden;
+        }
+        /* Table row styling */
+        .table-header,
+        .table-row {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+        }
+        .table-header {
+            background-color: #eee;
+            font-weight: bold;
+        }
+        .table-cell {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-right: 1px solid #ddd;
+        }
+        .table-cell:last-child {
+            border-right: none;
+        }
+        input,
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        /* Button styling */
+        button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .add-btn {
+            display: block;
+            margin: 20px auto;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <h2>Dynamic Inline Table</h2>
+    <!-- Table Container -->
+    <div id="table-container">
+        <div class="table-header">
+            <div class="table-cell">User ID</div>
+            <div class="table-cell">Rented Date</div>
+            <div class="table-cell">Days</div>
+            <div class="table-cell">Actions</div>
+        </div>
+        <!-- Initial row -->
+        <div class="table-row">
+            <div class="table-cell">
+                <select class="member-select">
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            <div class="table-cell"><input type="date" class="rented-date" /></div>
+            <div class="table-cell"><input type="number" class="days" placeholder="0" /></div>
+            <div class="table-cell"><button class="delete-btn">Delete</button></div>
+        </div>
+    </div>
+    <!-- Add button -->
+    <button id="add-row-btn" class="add-btn">Add Row</button>
+    
+    <!-- Placeholder for displaying the extracted bikeId -->
+    <p id="bikeIdDisplay"></p>
+
+    <script>
+        // Function to get the value of a query parameter by name
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Function to display the bikeId on the page
+        function displayBikeId() {
+            const bikeId = getQueryParam('bikeId');
+            const bikeIdDisplay = document.getElementById('bikeIdDisplay');
+            if (bikeId) {
+                bikeIdDisplay.textContent = "Extracted bikeId: " + bikeId;
+                // Store bikeId in localStorage
+                localStorage.setItem('currentBikeId', bikeId);
+            } else {
+                bikeIdDisplay.textContent = "No bikeId found in the URL.";
+            }
+        }
+
+        // Function to populate the dropdown with member data from localStorage
+        function populateDropdown(selectElement) {
+            const members = JSON.parse(localStorage.getItem('members')) || [];
+
+            // Clear existing options
+            selectElement.innerHTML = '';
+
+            // Populate dropdown options with member IDs
+            members.forEach(member => {
+                const option = document.createElement('option');
+                option.value = member.id; // Use the member ID
+                option.textContent = member.id; // Display the member ID
+                selectElement.appendChild(option);
+            });
+        }
+
+        // Function to populate dropdowns in all rows
+        function populateAllDropdowns() {
+            document.querySelectorAll('.member-select').forEach(selectElement => {
+                populateDropdown(selectElement);
+            });
+        }
+
+        // Call the functions when the page loads
+        window.onload = () => {
+            displayBikeId();
+            populateAllDropdowns();
+        };
+
+        const addRowBtn = document.getElementById("add-row-btn");
+        const tableContainer = document.getElementById("table-container");
+
+        // Function to handle row deletion
+        function handleDeleteClick(event) {
+            if (event.target && event.target.classList.contains("delete-btn")) {
+                const row = event.target.closest(".table-row");
+                const index = Array.from(tableContainer.querySelectorAll('.table-row')).indexOf(row);
+                row.remove();
+                // Remove from localStorage
+                const savedRentals = JSON.parse(localStorage.getItem('rent')) || [];
+                savedRentals.splice(index, 1);
+                localStorage.setItem('rent', JSON.stringify(savedRentals));
+            }
+        }
+
+        // Function to save the current table state to localStorage
+        function saveTableState() {
+            const rows = document.querySelectorAll('.table-row');
+            const rentals = [];
+            const currentBikeId = localStorage.getItem('currentBikeId'); // Retrieve current bikeId from localStorage
+
+            rows.forEach(row => {
+                const selectElement = row.querySelector('.member-select');
+                const dateInput = row.querySelector('.rented-date');
+                const daysInput = row.querySelector('.days');
+
+                if (selectElement && dateInput && daysInput) {
+                    rentals.push({
+                        bikeId: currentBikeId, // Use the bikeId from localStorage
+                        memberId: selectElement.value,
+                        rentedDate: dateInput.value,
+                        days: daysInput.value
+                    });
+                }
+            });
+            localStorage.setItem('rent', JSON.stringify(rentals));
+        }
+
+        // Add event listener to add a new row
+        addRowBtn.addEventListener("click", () => {
+            saveTableState(); // Save current table state before adding a new row
+
+            const newRow = document.createElement("div");
+            newRow.classList.add("table-row");
+            newRow.innerHTML = `
+                <div class="table-cell">
+                    <select class="member-select">
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                </div>
+                <div class="table-cell">
+                    <input type="date" class="rented-date" />
+                </div>
+                <div class="table-cell">
+                    <input type="number" class="days" placeholder="0" />
+                </div>
+                <div class="table-cell">
+                    <button class="delete-btn">Delete</button>
+                </div>
+            `;
+            tableContainer.appendChild(newRow);
+            // Populate dropdown for the new row
+            populateDropdown(newRow.querySelector(".member-select"));
+            // Attach event listener to the new delete button
+            newRow.querySelector(".delete-btn").addEventListener("click", handleDeleteClick);
+        });
+
+        // Attach event listener to existing delete buttons
+        tableContainer.addEventListener("click", handleDeleteClick);
+    </script>
+</body>
+</html>
