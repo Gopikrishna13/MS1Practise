@@ -172,7 +172,8 @@
             const rows = document.querySelectorAll('.table-row');
             const rentals = [];
             const currentBikeId = localStorage.getItem('currentBikeId'); // Retrieve current bikeId from localStorage
-
+            
+            const rental=JSON.parse(localStorage.getItem("rent"))|| [];
             rows.forEach(row => {
                 const selectElement = row.querySelector('.member-select');
                 const dateInput = row.querySelector('.rented-date');
@@ -180,6 +181,7 @@
 
                 if (selectElement && dateInput && daysInput) {
                     rentals.push({
+                        RID:rental.length+1,
                         bikeId: currentBikeId, // Use the bikeId from localStorage
                         memberId: selectElement.value,
                         rentedDate: dateInput.value,
