@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+font-family: 'Arial', sans-serif;
+padding: 20px;
+background-color: #f5f5f5;
+}
+h2 {
+text-align: center;
+color: #333;
+}
+/* Table container styling */
+#table-container {
+width: 80%;
+margin: 20px auto;
+border: 1px solid #ccc;
+border-radius: 8px;
+background-color: #fff;
+overflow: hidden;
+}
+/* Table row styling */
+.table-header,
+.table-row {
+display: flex;
+align-items: center;
+border-bottom: 1px solid #ddd;
+}
+.table-header {
+background-color: #eee;
+font-weight: bold;
+}
+.table-cell {
+flex: 1;
+padding: 10px;
+text-align: center;
+border-right: 1px solid #ddd;
+}
+.table-cell:last-child {
+border-right: none;
+}
+input,
+select {
+width: 100%;
+padding: 8px;
+border: 1px solid #ccc;
+border-radius: 4px;
+}
+/* Button styling */
+button {
+padding: 8px 12px;
+border: none;
+border-radius: 4px;
+cursor: pointer;
+font-size: 14px;
+}
+.add-btn {
+display: block;
+margin: 20px auto;
+background-color: #4CAF50;
+color: white;
+}
+.delete-btn {
+background-color: #f44336;
+color: white;
+}
+button:hover {
+opacity: 0.8;
+}
+
+    </style>
+</head>
+<body>
+    <p id="bikeIdDisplay"></p>
+
+
+    <h2>Dynamic Inline Table</h2>
+<!-- Table Container -->
+<div id="table-container">
+<div class="table-header">
+<div class="table-cell">Member</div>
+<div class="table-cell">Date</div>
+<div class="table-cell">Days</div>
+<div class="table-cell">Actions</div>
+</div>
+<!-- First row -->
+<div class="table-row">
+<div class="table-cell">
+<select class="member-select">
+
+</select>
+</div>
+<div class="table-cell"><input type="date" class="date" /></div>
+<div class="table-cell"><input type="number" placeholder="0" class="days"/></div>
+<div class="table-cell"><button class="delete-btn">Delete</button></div>
+</div>
+</div>
+<!-- Add button -->
+<button id="add-row-btn" class="add-btn">Add Row</button>
+</body>
+</html>
+<script>
+    // Function to get the value of a query parameter by name
+function getQueryParam(param) {
+// Get the query parameters from the URL
+const urlParams = new URLSearchParams(window.location.search);
+// Return the value associated with the given parameter name
+return urlParams.get(param);
+}
+// Function to display the videoId on the page
+function displaybikeId() {
+// Extract videoId from the URL
+const bikeId = getQueryParam('bikeId');
+// Get the element where the videoId will be displayed
+const bikeIdDisplay = document.getElementById('bikeIdDisplay');
+// Check if videoId is present in the URL
+if (bikeId) {
+    bikeIdDisplay.textContent = "Extracted bikeId: " + bikeId;
+    localStorage.setItem("currentId",JSON.stringify(bikeId));
+} else {
+    bikeIdDisplay.textContent = "No bikeId found in the URL.";
+}
+}
+// Call the displayVideoId function when the page loads
+window.onload =()=>{
+    displaybikeId();
+    populateAll();
+    loadsave();
+} 
+
+function loadsave()
+{
+    let rent=JSON.parse(localStorage.getItem("rent"))|| [];
+    rent.forEach(rent=>{
+        const newRow = document.createElement("div");
+newRow.classList.add("table-row");
+// Add columns to the new row
+newRow.innerHTML = `
+<div class="table-cell">
+<select class="member-select">
+
+</select>
+</div>
+<div class="table-cell">
+<input type="date" class="date" value="${rent.Date}"/>
+</div>
+<div class="table-cell">
+<input type="number" placeholder="0" class="days" value="${rent.Days}"/>
+</div>
+<div class="table-cell">
+<button class="delete-btn">Delete</button>
+</div>
+`;
+// Append the new row to the table container
+tableContainer.appendChild(newRow);
+populateDropdown(newRow.querySelector('.member-select'));
+// Attach event listener to the new delete button
+newRow.querySelector(".delete-btn").addEventListener("click", () => {
+    const member=newRow.querySelector('.member-select').value;
+    const date=newRow.querySelector('.date').value;
+    const days=newRow.querySelector('.days').value;
+    removeData(member,date);
+    
+newRow.remove();
+save();
+});
+
+});
+    
+}
+function populateAll()
+{
+    document.querySelectorAll('.member-select').forEach(selectElement=>{
+        populateDropdown(selectElement);
+    })
+}
+
+function populateDropdown(selectElement)
+{
+    let users=JSON.parse(localStorage.getItem("members"))|| [];
+    users.forEach(user=>{
+        const option=document.createElement('option');
+        option.value=user.id;
+        option.textContent=user.id;
+        selectElement.appendChild(option);
+    })
+}
+
+const addRowBtn = document.getElementById("add-row-btn");
+const tableContainer = document.getElementById("table-container");
+// Add event listener to add a new row
+addRowBtn.addEventListener("click", () => {
+const newRow = document.createElement("div");
+newRow.classList.add("table-row");
+// Add columns to the new row
+newRow.innerHTML = `
+<div class="table-cell">
+<select class="member-select">
+
+</select>
+</div>
+<div class="table-cell">
+<input type="date" class="date" />
+</div>
+<div class="table-cell">
+<input type="number" placeholder="0" class="days"/>
+</div>
+<div class="table-cell">
+<button class="delete-btn">Delete</button>
+</div>
+`;
+// Append the new row to the table container
+tableContainer.appendChild(newRow);
+populateDropdown(newRow.querySelector('.member-select'));
+// Attach event listener to the new delete button
+newRow.querySelector(".delete-btn").addEventListener("click", () => {
+    const member=newRow.querySelector('.member-select').value;
+    const date=newRow.querySelector('.date').value;
+    const days=newRow.querySelector('.days').value;
+    removeData(member,date);
+    newRow.remove();
+    save();
+
+});
+save();
+});
+
+
+function save()
+{
+const id=JSON.parse(localStorage.getItem("currentId"))|| [];
+let rent=JSON.parse(localStorage.getItem("rent"))|| [];
+let rows=document.querySelectorAll('.table-row');
+
+rows.forEach(row=>{
+    const member=row.querySelector('.member-select').value;
+    const date=row.querySelector('.date').value;
+    const days=row.querySelector('.days').value;
+
+    const newEntry={
+        RID:rent.length+1,
+        MemberId:member,
+        BikeId:id,
+        Date:date,
+        Days:days
+    }
+    if(member && date && days)
+    {
+        rent.push(newEntry);
+    }
+})
+localStorage.setItem("rent",JSON.stringify(rent));
+}
+
+function removeData(member,date)
+{
+    let rent=JSON.parse(localStorage.getItem("rent"))|| [];
+
+    let updated_data=rent.filter(detail=>!(detail.MemberId==member && detail.Date==date));
+
+    localStorage.setItem("rent",JSON.stringify(updated_data));
+}
+</script>

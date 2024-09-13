@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        
-/* Basic page styling */
-body {
+        body {
 font-family: Arial, sans-serif;text-align: center;margin-top: 50px;
 }
 /* Modal background */
@@ -44,6 +42,7 @@ font-size: 18px;
 <body>
     <div id="table"></div>
 
+
     <h1>Modal Window Example</h1>
 <!-- Trigger Button -->
 <button id="openModalBtn">Open Modal</button>
@@ -54,69 +53,60 @@ font-size: 18px;
 <h2 class="modal-title">Modal Title</h2>
 <div class="modal-body">
     <label>ID</label>
- 
     <input type="text" id="Id">
-    <br>
+    <br><br>
+
     <label>FirstName</label>
     <input type="text" id="fname">
-    <br>
+    <br><br>
 
     <label>LastName</label>
-    
     <input type="text" id="lname">
-    <br>
 
-    <label>DateOfBirth</label>
+    <br><br>
+
+    <label>DOB</label>
     <input type="text" id="dob">
-    <br>
+    <br><br>
 
-    <label>Image</label>
+    <lable>Image</lable>
     <input type="file" id="image">
-    <br>
-    <button id="clickModal">Click</button>
+    <br><br>
+<button id="clickModal">ADD</button>
+
 </div>
 </div>
 </div>
+
 </body>
 </html>
-
 <script>
     document.addEventListener("DOMContentLoaded",()=>{
-        display();
-    })
-
-
-    function display()
-    {
         let table=`<table border="2">
             <tr>
                 <th>ID</th>
                 <th>FirstName</th>
                 <th>LastName</th>
-                <th>DateOfBirth</th>
+                <th>DOB</th>
                 <th>Image</th>
                 </tr>`;
 
-            let existing_users=JSON.parse(localStorage.getItem("members"))|| [];
+            let users=JSON.parse(localStorage.getItem("members"))|| [];
 
-            for(const user of existing_users)
+            for(const user of users)
             {
-                table+=`
-                <tr>
+                table+=`<tr>
                     <td>${user.id}</td>
-                    <td>${user.firstName}</td>
-                    <td>${user.lastName}</td>
-                    <td>${user.dateOfBirth}</td>
-                    <td><img src="${user.image}" width="50"></td>
-                    </tr>
-                `;
+                        <td>${user.firstName}</td>
+                        <td>${user.lastName}</td>
+                        <td>${user.dateOfBirth}</td>
+                        <td><img src="${user.image}" width="50"></td>
+                    </tr>`;
             }
+
             table+=`</table>`;
             document.getElementById("table").innerHTML=table;
-    }
-
-
-
+    })
     const modal = document.getElementById("myModal");
 // Get open modal button
 const openModalBtn = document.getElementById("openModalBtn");
@@ -137,32 +127,28 @@ modal.style.display = "none";
 }
 });
 
-
 document.getElementById("clickModal").addEventListener('click',()=>{
-    let Id=document.getElementById("Id").value;
+    let id=document.getElementById("Id").value;
     let fname=document.getElementById("fname").value;
     let lname=document.getElementById("lname").value;
     let dob=document.getElementById("dob").value;
     let image=document.getElementById("image").files[0];
 
-let user=JSON.parse(localStorage.getItem("members"))|| [];
+    let Entry=JSON.parse(localStorage.getItem("members"))|| [];
 
     const reader=new FileReader();
     reader.onloadend=function()
     {
-        const newuser={
-            id:Id,
+        const newEntry={
+            id:id,
             firstName:fname,
             lastName:lname,
             dateOfBirth:dob,
             image:reader.result
         }
- user.push(newuser);
- localStorage.setItem("members",JSON.stringify(user));
- display();
-
+        Entry.push(newEntry);
+        localStorage.setItem("members",JSON.stringify(Entry));
     }
-    reader.readAsDataURL(image);
+reader.readAsDataURL(image);
 })
-
 </script>
